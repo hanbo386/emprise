@@ -9,6 +9,14 @@ export class ActionsSubject extends BehaviorSubject<Action> {
   constructor() {
     super({type: INIT})
   }
+
+  next(action: Action): void {
+    super.next(action);
+  }
+
+  complete(): void {
+    /*noop*/
+  }
 }
 
 export const ACTIONS_SUBJECT_PROVIDERS: Provider[] = [ActionsSubject];
