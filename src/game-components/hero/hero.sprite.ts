@@ -1,21 +1,21 @@
 import { HeroAbilities, IHero } from './models/hero.interface';
 import { Guid } from 'guid-typescript';
 import { GameFacade } from '../game-manager/game.facade';
-import { HeroPositions } from '../app-store/position/position-state.model';
+import { GamePosition, HeroPositionState } from '../core/app-store/position/position-state.model';
 import { filter, map } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
-import { IAttack } from '../game-manager/game.model';
+import { IAttack } from '../attack/models/attack.inferface';
 
 export class Hero implements IHero{
   id: string;
-  position: [number, number];
+  position: GamePosition;
   abilities: HeroAbilities;
   private interval;
 
   constructor (
     private _attackManager: BehaviorSubject<IAttack>,
     private _gameFacade: GameFacade,
-    initialPosition: [number, number] = [0, 0],
+    initialPosition: GamePosition = [0, 0],
     direction: number = 0
   ) {
     this.id = Guid.create().toString();
@@ -23,7 +23,6 @@ export class Hero implements IHero{
 
     this._gameFacade.getHeroPositions()
       .pipe(
-        map(p => p.heroPositions),
         filter(positions => {
           const keys = Object.keys(positions);
           return keys.length > 0;
@@ -69,7 +68,7 @@ export class Hero implements IHero{
     // noop
   }
 
-  private checkAllHeroPositions (heroPositions: HeroPositions) {
+  private checkAllHeroPositions (heroPositions: HeroPositionState) {
     for (let id in heroPositions) {
       if (id !== this.id) {
         if (Math.abs(heroPositions[id][1] - this.position[1]) <= 50) {

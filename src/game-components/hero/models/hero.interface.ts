@@ -1,8 +1,9 @@
-import { IAttack } from '../../game-manager/game.model';
+import { IAttack } from '../../attack/models/attack.inferface';
+import { GamePosition } from '../../core/app-store/position/position-state.model';
 
 export interface IHero {
   id: string,
-  position: [number, number],
+  position: GamePosition,
   abilities: HeroAbilities,
   attack: (targetId: string, sourceId: string) => void,
   defend: (attack: IAttack) => void,
