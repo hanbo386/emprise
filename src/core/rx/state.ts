@@ -20,7 +20,6 @@ export class State<T> extends BehaviorSubject<any> {
   ) {
     super(initialState);
 
-    console.log('state init.');
     const actionsOnQueue$: Observable<Action> = actions$.pipe(
       observeOn(queueScheduler)
     );

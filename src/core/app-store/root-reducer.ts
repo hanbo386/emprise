@@ -1,7 +1,9 @@
 import { ActionReducerMap } from '../rx/models';
 import { AppState } from './app-state.model';
-import { positionReducer } from './position/position.reducer';
+import { attackReducer } from './attack/attack.reducer';
+import { heroReducer } from './hero/hero.reducer';
 
 export const rootReducer: ActionReducerMap<AppState> = {
-  position: positionReducer,
+  heroes: heroReducer,
+  attacks: attackReducer
 };

@@ -1,9 +1,12 @@
-import { PositionState } from './position-state.model';
+import { AttackState } from './attack/attack-state.model';
+import { HeroState } from './hero/hero-state.model';
 
 export interface AppState {
-  position: PositionState;
+  heroes: HeroState;
+  attacks: AttackState
 }
 
 export const INITIAL_STATE: AppState = {
-  position: { position: [0, 0] }
+  heroes: {},
+  attacks: {},
 };

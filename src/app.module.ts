@@ -3,7 +3,7 @@ import { StoreModule } from './core/rx/store_module';
 import { AppService } from './app.service';
 import { INITIAL_STATE } from './core/app-store/app-state.model';
 import { rootReducer } from './core/app-store/root-reducer';
-import { PositionFacade } from './core/app-store/position/position.facade';
+import { GameFacade } from './game-manager/game.facade';
 
 @Module({
   imports: [
@@ -11,7 +11,7 @@ import { PositionFacade } from './core/app-store/position/position.facade';
   ],
   providers: [
     AppService,
-    PositionFacade
+    GameFacade
   ]
 })
 export class AppModule {}
