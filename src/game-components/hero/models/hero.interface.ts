@@ -7,7 +7,7 @@ export interface IHero {
   speed: number,
   forceLevel: number,
   health: number,
-  startAttack: (targetId: string) => void,
+  startAttack: (targetId: string, targetAttackId: string) => string,
   defend: (attack: IAttack) => void,
   fightBack: () => void
 }

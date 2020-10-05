@@ -6,7 +6,10 @@ export interface IHeroInitial {
   physicalRadius: number,
   speed: number,
   sensibleDistance: number,
+  defendDistance: number,
+  forceAmount: number,
   forceLevel: number,
+  forceRecoverTime: number,
   forceSpeed: number
 }
 
@@ -17,7 +20,10 @@ export const RANDOM_HEROES: IHeroInitial[] = [
     physicalRadius: 5,
     speed: 1,
     sensibleDistance: 50,
-    forceLevel: 10,
+    defendDistance: 20,
+    forceAmount: 100,
+    forceLevel: 30,
+    forceRecoverTime: 20,
     forceSpeed: 3
   },
   {
@@ -26,7 +32,10 @@ export const RANDOM_HEROES: IHeroInitial[] = [
     physicalRadius: 5,
     speed: 2,
     sensibleDistance: 20,
+    defendDistance: 10,
+    forceAmount: 20,
     forceLevel: 5,
+    forceRecoverTime: 20,
     forceSpeed: 3
   }
 ];

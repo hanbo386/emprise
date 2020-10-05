@@ -17,7 +17,10 @@ export class Hero implements IHero{
   health: number = 10;
 
   sensibleDistance: number;
+  defendDistance: number;
+  forceAmount: number;
   forceLevel: number;
+  forceRecoverTime: number;
   forceSpeed: number;
 
   private _heroShapes: HeroState;
@@ -39,11 +42,14 @@ export class Hero implements IHero{
     this.id = Guid.create().toString();
     this.position = heroInitial.position;
     this.sensibleDistance = heroInitial.sensibleDistance;
+    this.forceAmount = heroInitial.forceAmount;
     this.forceLevel = heroInitial.forceLevel;
     this.forceSpeed = heroInitial.forceSpeed;
     this.health = heroInitial.health;
     this._physicalRadius = heroInitial.physicalRadius;
     this.shortName = getShortName(this.id);
+    this.forceRecoverTime = heroInitial.forceRecoverTime;
+    this.defendDistance = heroInitial.defendDistance;
 
     this._direction = direction;
 
@@ -82,22 +88,28 @@ export class Hero implements IHero{
   //   }
   // }
 
-  startAttack(targetId: string) {
+  startAttack(targetId: string, targetAttackId: string): string {
+    if (this.forceAmount <= 0) {
+      return null;
+    }
     const attack = new Attack(
       this._gameFacade,
       targetId,
+      targetAttackId,
       this.id,
       this.position,
       this.forceSpeed,
       this.forceLevel
     );
-
-    console.log(`Hero ${this.shortName} starts a new attack ${getShortName(attack.id)}`);
+    this.forceAmount -= this.forceLevel;
+    if (this.forceAmount <= 0) {
+      console.log(`Hero ${this.shortName} run out of force...`)
+    }
     this._allAttackIds.push(attack.id);
+    return attack.id;
   }
 
   defend (attack: IAttack) {
-    console.log(`Hero ${this.shortName} is under attack! Attack info: ${attack.attackInfo}`);
   }
 
   fightBack () {
@@ -124,7 +136,7 @@ export class Hero implements IHero{
     this._timeOut = setTimeout(() => {
       console.log(`Time out, hero ${this.shortName} destroying...`);
       this.cleanUpHero();
-    }, 3000);
+    }, 3000000);
   }
   // todo: do not use state here
   private checkAllHeroPositions () {
@@ -132,7 +144,10 @@ export class Hero implements IHero{
       for (let id in this._heroShapes) {
         if (id !== this.id) {
           if (this.getPhysicalDistance(this._heroShapes[id]) <= this.sensibleDistance) {
-            this.startAttack(id);
+            const attackId = this.startAttack(id, '');
+            if (attackId) {
+              console.log(`Enemy ${getShortName(id)} detected! Hero ${this.shortName} starts a new attack ${getShortName(attackId)}.`);
+            }
           }
         }
       }
@@ -151,14 +166,22 @@ export class Hero implements IHero{
   private checkAllAttacks (attacks: AttackState) {
     for (let id in attacks) {
       if (attacks[id].destHeroIds.includes(this.id)) {
+        // check attack hit
         if (this.checkHitByAttack(attacks[id].attackShape)) {
           this.health -= attacks[id].forceLevel;
-          console.log(`Hero ${this.shortName} is under attack from hero ${getShortName(attacks[id].sourceHeroId)}'s attack ${getShortName(id)}.`);
+          console.log(`Hero ${this.shortName} is under attack from hero ${getShortName(attacks[id].sourceHeroId)}'s attack ${getShortName(id)}. radius: ${attacks[id].attackShape.radius}`);
           console.log(`Current health is: ${this.health}`);
           if (this.health <= 0) {
             console.log(`Hero ${this.shortName} attacked to death.Going to clear up hero.`);
             this.cleanUpHero();
             console.log('Hero cleaned.----------------------------------------------------');
+          }
+        } else { // check if need to defend
+          if (this.checkCanDefend(attacks[id].attackShape)) {
+            const attackId = this.startAttack(attacks[id].sourceHeroId, id);
+            if (attackId) {
+              console.log(`Attack ${getShortName(id)} detected! Hero ${this.shortName} starts a new attack ${getShortName(attackId)} to fight back.`);
+            }
           }
         }
       }
@@ -169,6 +192,14 @@ export class Hero implements IHero{
     if (attackShape) {
       const originDistance = getDistance(this.position, attackShape.origin);
       return originDistance <= (this._physicalRadius + attackShape.radius);
+    }
+    return false;
+  }
+
+  private checkCanDefend(attackShape: AttackShape): boolean {
+    if (attackShape) {
+      const originDistance = getDistance(this.position, attackShape.origin);
+      return originDistance <= (this._physicalRadius + this.defendDistance + attackShape.radius);
     }
     return false;
   }

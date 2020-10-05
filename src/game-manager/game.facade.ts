@@ -47,11 +47,11 @@ export class GameFacade {
                        attackShape: AttackShape,
                        forceLevel: number,
                        sourceHeroId: string,
-                       destHeroIds: string[],
-                       destAttackIds: string[]
+                       targetHeroIds: string[],
+                       targetAttackIds: string[]
   ) {
 
-    this._store.dispatch(new UpdateAttackAction(id, attackShape, forceLevel, sourceHeroId, destHeroIds, destAttackIds))
+    this._store.dispatch(new UpdateAttackAction(id, attackShape, forceLevel, sourceHeroId, targetHeroIds, targetAttackIds))
   }
 
   public removeAttack (id: string) {
