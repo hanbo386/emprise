@@ -18,7 +18,7 @@ export class Attack {
 
 
   private _heroShapes;
-  private _attacksAlive;
+  private _aliveAttacks;
   private _timer;
   private _heroPositionSubscription;
   private _attackSubscription;
@@ -52,7 +52,7 @@ export class Attack {
           // filter(attacks => attacks.)
         )
         .subscribe(attacks => {
-          this.checkAttacks(attacks);
+          this._aliveAttacks = attacks;
         });
 
     // update hero states
@@ -76,23 +76,25 @@ export class Attack {
         };
         this._gameFacade.updateAttack(this.id, this.attackShape, this.forceLevel, this.sourceHeroId, [this.targetHeroId], [this.targetAttackId]);
         this.checkHeroPositions();
+        this.checkAttacks();
       } else {
         console.log(`Attack ${this.shortName} run out of lifespan. Self destroyed...`);
         this.cleanUpAttack();
       }
+      console.log(`${this.shortName} updating attacks...`);
     }, 16);
   }
 
   // todo: remove use state directly here
-  private checkAttacks (attacks: AttackState) {
-    for(let id in attacks) {
+  private checkAttacks () {
+    for(let id in this._aliveAttacks) {
       // target Hero or attack found
-      if (attacks[id].destHeroIds.includes(this.sourceHeroId)
-        || attacks[id].destAttackIds.includes(this.id)) {
+      if (this._aliveAttacks[id].destHeroIds.includes(this.sourceHeroId)
+        || this._aliveAttacks[id].destAttackIds.includes(this.id)) {
 
-        if (this.checkAttackHit(attacks[id].attackShape)) {
-          console.log(`Attack ${this.shortName} hit another attack ${getShortName(id)}. radius: ${this._radius},${attacks[id].attackShape.radius}`);
-          this.forceLevel = this.forceLevel - attacks[id].forceLevel;
+        if (this.checkAttackHit(this._aliveAttacks[id].attackShape)) {
+          console.log(`Attack ${this.shortName} hit another attack ${getShortName(id)}. radius: ${this._radius},${this._aliveAttacks[id].attackShape.radius}`);
+          this.forceLevel = this.forceLevel - this._aliveAttacks[id].forceLevel;
           if (this.forceLevel <= 0) {
             console.log(`Attack ${this.shortName} vanished cause it's force level gone...`);
             this.cleanUpAttack();

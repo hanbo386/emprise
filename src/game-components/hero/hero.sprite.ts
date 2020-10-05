@@ -24,11 +24,11 @@ export class Hero implements IHero{
   forceSpeed: number;
 
   private _heroShapes: HeroState;
+  private _liveAttacks: AttackState;
   private _timer;
   private _timeOut;
   private _positionSubscription;
   private _attackSubscription;
-  private _allAttackIds: string[] = [];
   private _direction: number;
   private _physicalRadius: number;
   public shortName: string;
@@ -73,7 +73,13 @@ export class Hero implements IHero{
         })
       )
       .subscribe(attacks => {
-        this.checkAllAttacks(attacks);
+        this._liveAttacks = attacks;
+        if (Object.keys(this._liveAttacks).length <= 0) {
+          console.log('Attack state now is empty..')
+        }
+        for(let id in this._liveAttacks) {
+          console.log(`Attack id: ${id}, radius: ${this._liveAttacks[id].attackShape.radius}`);
+        }
       });
 
 
@@ -105,7 +111,6 @@ export class Hero implements IHero{
     if (this.forceAmount <= 0) {
       console.log(`Hero ${this.shortName} run out of force...`)
     }
-    this._allAttackIds.push(attack.id);
     return attack.id;
   }
 
@@ -131,12 +136,13 @@ export class Hero implements IHero{
   private startTimer() {
     this._timer = setInterval(() => {
       this.checkAllHeroPositions();
+      this.checkAllAttacks();
     }, 16);
 
     this._timeOut = setTimeout(() => {
       console.log(`Time out, hero ${this.shortName} destroying...`);
       this.cleanUpHero();
-    }, 3000000);
+    }, 30000000);
   }
   // todo: do not use state here
   private checkAllHeroPositions () {
@@ -163,13 +169,13 @@ export class Hero implements IHero{
   }
 
   // todo: do not use state here
-  private checkAllAttacks (attacks: AttackState) {
-    for (let id in attacks) {
-      if (attacks[id].destHeroIds.includes(this.id)) {
+  private checkAllAttacks () {
+    for (let id in this._liveAttacks) {
+      if (this._liveAttacks[id].destHeroIds.includes(this.id)) {
         // check attack hit
-        if (this.checkHitByAttack(attacks[id].attackShape)) {
-          this.health -= attacks[id].forceLevel;
-          console.log(`Hero ${this.shortName} is under attack from hero ${getShortName(attacks[id].sourceHeroId)}'s attack ${getShortName(id)}. radius: ${attacks[id].attackShape.radius}`);
+        if (this.checkHitByAttack(this._liveAttacks[id].attackShape)) {
+          this.health -= this._liveAttacks[id].forceLevel;
+          console.log(`Hero ${this.shortName} is under attack from hero ${getShortName(this._liveAttacks[id].sourceHeroId)}'s attack ${getShortName(id)}. radius: ${this._liveAttacks[id].attackShape.radius}`);
           console.log(`Current health is: ${this.health}`);
           if (this.health <= 0) {
             console.log(`Hero ${this.shortName} attacked to death.Going to clear up hero.`);
@@ -177,8 +183,8 @@ export class Hero implements IHero{
             console.log('Hero cleaned.----------------------------------------------------');
           }
         } else { // check if need to defend
-          if (this.checkCanDefend(attacks[id].attackShape)) {
-            const attackId = this.startAttack(attacks[id].sourceHeroId, id);
+          if (this.checkCanDefend(this._liveAttacks[id].attackShape)) {
+            const attackId = this.startAttack(this._liveAttacks[id].sourceHeroId, id);
             if (attackId) {
               console.log(`Attack ${getShortName(id)} detected! Hero ${this.shortName} starts a new attack ${getShortName(attackId)} to fight back.`);
             }
